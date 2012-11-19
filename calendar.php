@@ -23,8 +23,6 @@
 
 			//split into events
 			$previousEvents = explode("////EVENT SEPARATOR////", $previousData);
-			//for($event=1; $event <= $numberOfPreviousEvents; $event += 1){
-				//$eventInfo = explode("////ITEM SEPARATOR////", $previousEvents[$event]);
 			$event = 0;
 			foreach($previousEvents as $eachEvent) {
 				$eventInfo = explode("////ITEM SEPARATOR////", $eachEvent);

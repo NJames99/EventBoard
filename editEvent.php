@@ -47,7 +47,6 @@
 				return false;
 			}
 			
-			//todo: implement delete event
 			deleteEvent = function() {
 				var orly = confirm("Really? Delete the event?");
 				if (orly == true) {
