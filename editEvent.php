@@ -9,6 +9,7 @@
 			<?php
 			$whichEvent = $_GET[number];
 			echo "<input type='hidden' name='number' value='$whichEvent'/>";
+			echo "<input type='hidden' name='del' value='no' />";
 
 			$eventSeparator = "////EVENT SEPARATOR////";
 			$itemSeparator = "////ITEM SEPARATOR////";
@@ -20,7 +21,7 @@
 			fclose($fileHandle);
 			$previousEvents = explode($eventSeparator, $previousData);
 			$numberOfPreviousEvents = $previousEvents[0];
-
+			
 			$eventToEdit =  explode($itemSeparator, $previousEvents[$whichEvent]);
 			$title       =  $eventToEdit[0];
 			$location    =  $eventToEdit[1];
@@ -37,11 +38,24 @@
 			echo "Description:<br/><textarea name='description' cols=80 rows=10 placeholder='Enter a description of your event'>$description</textarea>";
 			?>
 			<input type="submit" id="accept" name="accept" value="Accept" />
-			<input type="button" id="cancel" name="cancel" value="Cancel edit" onclick="" />
-			<input type="button" id="delete" name="delete" value="Delete event" onclick="" />
+			<input type="button" id="cancel" name="cancel" value="Cancel edit" onclick="cancelEdit()" />
+			<input type="button" id="delete" name="delete" value="Delete event" onclick="deleteEvent()" />
 		</form>
 		<script>
-			//todo: cancel and delete events
+			cancelEdit = function() {
+				window.location.assign("http://cffm-events.awardspace.biz/calendar.php");
+				return false;
+			}
+			
+			//todo: implement delete event
+			deleteEvent = function() {
+				var orly = confirm("Really? Delete the event?");
+				if (orly == true) {
+					editEvent.del.value="yes";
+					editEvent.submit();
+				}
+				return false;
+			}
 		</script>
 	</body>
 </html>

@@ -15,18 +15,20 @@ $eventSeparator = "////EVENT SEPARATOR////";
 $itemSeparator = "////ITEM SEPARATOR////";
 $lineSeparator = "////LINE SEPARATOR////";
 $newEvent = $title.$itemSeparator.$location.$itemSeparator.$contact.$itemSeparator.$startdate.$itemSeparator.$enddate.$itemSeparator.$description;
-
+$newEvent = htmlspecialchars($newEvent, ENT_QUOTES); //deal with special characters like ' or \ or " in the text
+$newEvent = str_replace("\\", "", $newEvent); //strip all backslash characters
+// -- TODO: what happens if I reverse the order of these two lines?^
+ 
 //get existing events from file
 $fileName = "calendar.txt";
 $fileHandle = fopen($fileName, 'r') or die("can't open file to read");
 $previousData = fread($fileHandle, filesize($fileName));
 fclose($fileHandle);
 $previousEvents = explode($eventSeparator, $previousData);
-$numberOfPreviousEvents = $previousEvents[0];
 
 //write new version of events file
 $fileHandle = fopen($fileName, 'w') or die("can't open file to write");
-$newVersion = str_replace($numberOfPreviousEvents, $numberOfPreviousEvents+1, $previousData).$eventSeparator.$newEvent;
+$newVersion = $previousData.$eventSeparator.$newEvent;
 fwrite($fileHandle, $newVersion);
 fclose($fileHandle);
 
