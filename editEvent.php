@@ -1,49 +1,68 @@
 <!DOCTYPE html>
-<html>
+<html style="background-color : rgb(245,245,230);">
 	<head>
-		<title>Calendar of Events</title>
+		<style>
+			h2 {
+				display: inline;
+			}
+			body {
+				margin-top : 10em;
+				margin-left : auto;
+				margin-right : auto;
+				max-width : 40em;
+				min-width : 40em;
+				align : left;
+				border : 3px solid #886868;
+				background-color : rgb(235,235,215); 
+				padding : .3em;
+			}
+		</style>
+		<title>Edit Event</title>
 	</head>
 	<body>
 		<h2>Edit Event</h2>
 		<form id="editEvent" method="post" action="doEdit.php">
 			<?php
 			$whichEvent = $_GET[number];
+
 			echo "<input type='hidden' name='number' value='$whichEvent'/>";
 			echo "<input type='hidden' name='del' value='no' />";
 
-			$eventSeparator = "////EVENT SEPARATOR////";
-			$itemSeparator = "////ITEM SEPARATOR////";
-
-			//get existing events from file
-			$fileName = "calendar.txt";
-			$fileHandle = fopen($fileName, 'r') or die("can't open file to read");
-			$previousData = fread($fileHandle, filesize($fileName));
-			fclose($fileHandle);
-			$previousEvents = explode($eventSeparator, $previousData);
-			$numberOfPreviousEvents = $previousEvents[0];
+			$dbH = sqlite_open('myDatabase.sqlite');
+			$query = sqlite_query($dbH, 'SELECT * FROM events WHERE id='.$whichEvent);
+			$eventToEdit = sqlite_fetch_array($query, SQLITE_ASSOC);
 			
-			$eventToEdit =  explode($itemSeparator, $previousEvents[$whichEvent]);
-			$title       =  $eventToEdit[0];
-			$location    =  $eventToEdit[1];
-			$contact     =  $eventToEdit[2];
-			$startdate   =  $eventToEdit[3];
-			$enddate    =  $eventToEdit[4];
-			$description =  $eventToEdit[5];
+			$title       =  $eventToEdit['Title'];
+			$location    =  $eventToEdit['Location'];
+			$contact     =  $eventToEdit['Contact'];
+			$startdate   =  $eventToEdit['Startdate'];
+			$enddate    =  $eventToEdit['Enddate'];
+			$description =  $eventToEdit['Description'];
 			
-			echo "Event title:<input type='text' size=100 id='title' name='title' value='$title' /><br/>";
-			echo "Event location:<input type='text' size=96 id='location' name='location' value='$location' /><br/>";
-			echo "contact: <input type='text' id='contact' name='contact' value='$contact' /><br/>";
-			echo "start date:<input type='date' id='startdate' name='startdate' value='$startdate'/> <br/>";
-			echo "end date: <input type='date' id='enddate' name='enddate' value='$enddate'/><br/>";
-			echo "Description:<br/><textarea name='description' cols=80 rows=10 placeholder='Enter a description of your event'>$description</textarea>";
+			echo 'Event title:<input type="text" size=80 id="title" name="title" value="'.$title.'" /><br/>';
+			echo 'Event location:<input type="text" size=80 id="location" name="location" value="'.$location.'" /><br/>';
+			echo 'contact: <input type="text" size=80 id="contact" name="contact" value="'.$contact.'" /><br/>';
+			echo 'start date:<input type="date" id="startdate" name="startdate" value="'.$startdate.'"/> ';
+			echo 'end date: <input type="date" id="enddate" name="enddate" value="'.$enddate.'"/><br/>';
+			echo 'Description:<br/><textarea name="description" cols=70 rows=10 placeholder="Enter a description of your event">'.$description.'</textarea>';
 			?>
-			<input type="submit" id="accept" name="accept" value="Accept" />
+			<br/>
+			<select name="tags">
+				<option value="#MidwestZone">      #MidwestZone       </option>
+				<option value="#NorthAtlanticZone">#NorthAtlanticZone </option>
+				<option value="#NorthCentralZone"> #NorthCentralZone  </option>
+				<option value="#NorthwestZone">    #NorthwestZone     </option>
+				<option value="#SoutheastZone">    #SoutheastZone     </option>
+				<option value="#SouthCentralZone"> #SouthCentralZone  </option>
+				<option value="#SouthwestZone">    #SouthwestZone     </option>
+			</select>
+			<input type="submit" id="accept" name="accept" value="Change event" />
 			<input type="button" id="cancel" name="cancel" value="Cancel edit" onclick="cancelEdit()" />
 			<input type="button" id="delete" name="delete" value="Delete event" onclick="deleteEvent()" />
 		</form>
 		<script>
 			cancelEdit = function() {
-				window.location.assign("http://cffm-events.awardspace.biz/calendar.php");
+				window.location.assign("calendar.php");
 				return false;
 			}
 			

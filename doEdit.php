@@ -1,54 +1,51 @@
 <html>
 <head>
+<title>"editing"</title>
 </head>
 <body>
 <?php
-//get new event values from POST
-$whichEvent  =  $_POST['number'];
-$title       =  $_POST['title'];
-$location    =  $_POST['location'];
-$contact     =  $_POST['contact'];
-$startdate   =  $_POST['startdate'];
-$enddate     =  $_POST['enddate'];
-$description =  $_POST['description'];
 
-$eventSeparator = "////EVENT SEPARATOR////";
-$itemSeparator = "////ITEM SEPARATOR////";
-$lineSeparator = "////LINE SEPARATOR////";
-$changedEvent = $title.$itemSeparator.$location.$itemSeparator.$contact.$itemSeparator.$startdate.$itemSeparator.$enddate.$itemSeparator.$description;
-$changedEvent = htmlspecialchars($changedEvent, ENT_QUOTES); //deal with special characters like ' or / or " in the text
-$changedEvent = str_replace("\\", "", $changedEvent);
-
-//delete this event instead of editing it?
-if ($_POST['del'] == "yes") {
-	$changedEvent = "";
-}
-
-//get existing events from file
-$fileName = "calendar.txt";
-$fileHandle = fopen($fileName, 'r') or die("can't open file to read");
-$previousData = fread($fileHandle, filesize($fileName));
-fclose($fileHandle);
-$events = explode($eventSeparator, $previousData);
-
-$events[$whichEvent] = $changedEvent;
-$newVersion = implode($eventSeparator, $events);
-$newVersion = str_replace($eventSeparator.$eventSeparator, $eventSeparator, $newVersion); //remove double event seprator if present (which it would be after deleting event)
-
-//write new version of events file
-$fileHandle = fopen($fileName, 'w') or die("can't open file to write");
-fwrite($fileHandle, $newVersion);
-fclose($fileHandle);
-
-if ($_POST['del'] == "yes") {
-	echo "event deleted!";
-} else {
-	echo "event edited!";
-}
-
+	//get new event values from POST
+	$_POST = str_replace("\\", "", $_POST);
+	//$_POST = htmlspecialchars($_POST, ENT_QUOTES);
+	//$_POST = sqlite_escape_string($_POST);
+	$whichEvent  =  $_POST['number'];
+	$title       =  htmlspecialchars(sqlite_escape_string($_POST['title']));
+	$location    =  htmlspecialchars( sqlite_escape_string($_POST['location']) );
+	$contact     =  htmlspecialchars( sqlite_escape_string($_POST['contact']) );
+	$startdate   =  htmlspecialchars( sqlite_escape_string( $_POST['startdate']) ); $startdate = date( "Y-m-d", strtotime($startdate));
+	$enddate     =  htmlspecialchars( sqlite_escape_string( $_POST['enddate']) ); $enddate = date( "Y-m-d", strtotime($enddate));
+	$description =  htmlspecialchars( sqlite_escape_string( $_POST['description'] ) );
+	$tags		 =  htmlspecialchars( sqlite_escape_string( $_POST['tags'] ) );
+	
+	//delete this event instead of editing it?
+	if ($_POST['del'] == "yes") {
+		echo "deleting...";
+		$dbH = sqlite_open('myDatabase.sqlite');
+		$query = sqlite_query($dbH, 'DELETE FROM events WHERE id='.$whichEvent);
+	}
+	else
+	{
+		$dbH = sqlite_open('myDatabase.sqlite');
+		//echo sqlite_error_string(sqlite_last_error($dbH))."<br/>";
+		$q = "UPDATE events SET".
+		" Title='$title',". // Location = '$location' WHERE id=".$whichEvent;/*.
+		" Location='$location',".
+		" Contact='$contact',".
+		" Startdate='$startdate',".
+		" Enddate='$enddate',".
+		" Description='$description',".
+		" Tags='$tags',".
+		" Editdate='".strval(time())."'".
+		" WHERE id=".$whichEvent;
+		//echo $q;
+		$query = sqlite_query($dbH, $q);
+		//echo sqlite_error_string(sqlite_last_error($dbH))."<br/>";
+		// "SQL logic error or missing database" probably means you left out a comma between columns
+	}
 ?>
 <script>
-	window.location.assign("http://cffm-events.awardspace.biz/calendar.php");
+	window.location.assign("calendar.php?number=&sorttype=p&offset=0&show=20");
 </script>
 </body>
 </html>
